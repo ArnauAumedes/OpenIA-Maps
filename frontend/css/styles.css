@@ -1,0 +1,93 @@
+/* Estilos del frontend */
+/* Autor: Arnau Aumedes */
+/* Fecha: 18/03/2026 */
+/* Versió: 1.0.0 */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  background: #f5f5f5;
+}
+
+header {
+  background: #1a73e8;
+  color: white;
+  padding: 1rem 2rem;
+  text-align: center;
+}
+
+main {
+  display: flex;
+  height: calc(100vh - 64px);
+}
+
+#sidebar {
+  width: 300px;
+  padding: 1rem;
+  background: white;
+  overflow-y: auto;
+  border-right: 1px solid #ddd;
+}
+
+#sidebar h2 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+#coords-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+#coords-form label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #555;
+}
+
+#coords-form input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+#coords-form button {
+  padding: 0.6rem;
+  background: #1a73e8;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+#coords-form button:hover {
+  background: #1557b0;
+}
+
+#history {
+  list-style: none;
+  font-size: 0.85rem;
+  color: #444;
+}
+
+#history li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+#map {
+  flex: 1;
+  height: 100%;
+}
