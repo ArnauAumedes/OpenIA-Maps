@@ -7,28 +7,37 @@
  * La información se obtiene mediante una consulta a la API de OpenAI y se devuelve en formato JSON.
  */
 
+import fs from "fs";
+import path from "path";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import path from "path";
 import queryRouter from "./routes/query";
 
 dotenv.config();
-  
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware global
-app.use(cors());                    
-app.use(express.json());           
+app.use(cors());
+app.use(express.json());
 
-// Servir archivos estáticos del frontend
-app.use(express.static(path.join(__dirname, "..", "frontend")));
+const frontendPath = path.join(__dirname, "..", "frontend");
 
-// Rutas API
+// Sirve css/js/imagenes, pero no index.html automatico
+app.use(express.static(frontendPath, { index: false }));
+
+// Inyecta GOOGLE_MAPS_API_KEY en el HTML
+app.get("/", (_req, res) => {
+  const indexPath = path.join(frontendPath, "index.html");
+  const rawHtml = fs.readFileSync(indexPath, "utf8");
+  const mapsKey = process.env.GOOGLE_MAPS_API_KEY || "";
+  const html = rawHtml.replace(/__GOOGLE_MAPS_API_KEY__/g, mapsKey);
+  res.send(html);
+});
+
 app.use("/api/query", queryRouter);
 
-// Arrancar el servidor
 app.listen(PORT, () => {
-  console.log(`Servidor escoltant a http://localhost:${PORT}`);
+  console.log("Servidor escoltant a http://localhost:" + PORT);
 });

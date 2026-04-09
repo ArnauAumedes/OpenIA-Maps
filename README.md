@@ -1,185 +1,358 @@
 # OpenIA-Maps
 
-> Realiza consultas inteligentes con la API de OpenAI y visualízalas en Google Maps.
+> Consultes geogràfiques intel·ligents amb OpenAI i visualització directa sobre Google Maps.
 
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Express](https://img.shields.io/badge/Express-5.x-000000?logo=express&logoColor=white)](https://expressjs.com/)
 [![OpenAI](https://img.shields.io/badge/OpenAI-API-412991?logo=openai&logoColor=white)](https://openai.com/)
+[![Google Maps](https://img.shields.io/badge/Google%20Maps-JS%20API-4285F4?logo=googlemaps&logoColor=white)](https://developers.google.com/maps)
+
+## Taula de continguts
+
+- [Visio General](#visio-general)
+- [Stack Tecnologic](#stack-tecnologic)
+- [Estructura del Projecte](#estructura-del-projecte)
+- [Arquitectura i Flux](#arquitectura-i-flux)
+- [API Backend](#api-backend)
+- [Instal lacio i Arrencada](#instal-lacio-i-arrencada)
+- [Configuracio d'Entorn](#configuracio-d-entorn)
+- [Exemples d'Us](#exemples-d-us)
+- [Troubleshooting](#troubleshooting)
+- [Seguretat i Bones Practiques](#seguretat-i-bones-practiques)
+- [Contribucio](#contribucio)
+- [Llicencia](#llicencia)
 
 ---
 
-## Tabla de contenidos
+## Visio General
 
-- [Requisitos previos](#requisitos-previos)
-- [Paso 1 — Inicializar el proyecto](#paso-1--inicializar-el-proyecto)
-  - [1.1 Crear el package.json](#11-crear-el-packagejson)
-  - [1.2 Instalar dependencias de producción](#12-instalar-dependencias-de-producción)
-  - [1.3 Instalar dependencias de desarrollo](#13-instalar-dependencias-de-desarrollo)
-  - [1.4 Configurar TypeScript](#14-configurar-typescript)
-  - [1.5 Añadir scripts de ejecución](#15-añadir-scripts-de-ejecución)
+OpenIA-Maps combina un backend amb Express + TypeScript i un frontend lleuger en JavaScript per transformar coordenades GPS en context geografic, cultural i historic generat per IA.
 
----
+Flux principal:
 
-## Requisitos previos
-
-| Herramienta | Versión mínima | Enlace |
-|-------------|---------------|--------|
-| Node.js     | 18+           | [nodejs.org](https://nodejs.org/) |
-| npm         | 9+            | Incluido con Node.js |
-| Git         | 2.x           | [git-scm.com](https://git-scm.com/) |
-
-Verifica tu instalación:
-
-```bash
-node -v
-npm -v
-git --version
-```
+1. L'usuari introdueix coordenades o fa clic al mapa.
+2. El frontend envia una peticio a `POST /api/query`.
+3. El backend valida `lat` i `lng`.
+4. El servei consulta OpenAI amb un prompt especialitzat.
+5. La resposta es mostra en un marcador al mapa i s afegeix a l historial.
 
 ---
 
-## Paso 1 — Inicializar el proyecto
+## Stack Tecnologic
 
-### Conceptos clave
+| Capa | Tecnologia | Us principal |
+|---|---|---|
+| Backend | Express 5 + TypeScript | API REST i logica de negoci |
+| IA | OpenAI SDK | Generacio de context geografic a partir de coordenades |
+| Frontend | HTML + CSS + JavaScript vanilla | Formulari, historial i interaccio UI |
+| Mapes | Google Maps JavaScript API | Render del mapa i marcadors |
+| Config | dotenv | Gestio de variables d'entorn |
 
-**`package.json`** es el manifiesto de tu proyecto Node.js. Define:
+Dependencies detectades a `package.json`:
 
-- **Nombre, versión y scripts** de ejecución del proyecto.
-- **`dependencies`** — paquetes necesarios en producción.
-- **`devDependencies`** — paquetes solo para desarrollo (TypeScript, tipos, etc.).
-
----
-
-### 1.1 Crear el `package.json`
-
-Abre una terminal en la raíz del proyecto y ejecuta:
-
-```bash
-npm init -y
-```
-
-Esto genera un `package.json` con valores por defecto que iremos completando.
+- Produccio: `express`, `cors`, `dotenv`, `openai`
+- Desenvolupament: `typescript`, `ts-node`, `@types/node`, `@types/express`, `@types/cors`
 
 ---
 
-### 1.2 Instalar dependencias de producción
+## Estructura del Projecte
 
-```bash
-npm install express openai dotenv cors
-```
-
-| Paquete   | Descripción |
-|-----------|-------------|
-| `express` | Framework web para crear el servidor HTTP y definir rutas |
-| `openai`  | SDK oficial para llamar a la API de OpenAI |
-| `dotenv`  | Carga variables de entorno desde un archivo `.env` |
-| `cors`    | Permite que el frontend (otro origen) haga peticiones al backend |
-
----
-
-### 1.3 Instalar dependencias de desarrollo
-
-```bash
-npm install -D typescript ts-node @types/node @types/express @types/cors
-```
-
-| Paquete           | Descripción |
-|-------------------|-------------|
-| `typescript`      | Compilador de TypeScript |
-| `ts-node`         | Ejecuta archivos `.ts` directamente sin compilar a mano |
-| `@types/node`     | Tipos de TypeScript para las APIs de Node.js |
-| `@types/express`  | Tipos para Express |
-| `@types/cors`     | Tipos para cors |
-
----
-
-### 1.4 Configurar TypeScript
-
-Genera el archivo de configuración:
-
-```bash
-npx tsc --init
-```
-
-Reemplaza el contenido de **`tsconfig.json`** con la siguiente configuración:
-
-```json
-{
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "commonjs",
-    "rootDir": "./backend",
-    "outDir": "./dist",
-    "strict": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
-  },
-  "include": ["backend/**/*"],
-  "exclude": ["node_modules", "dist"]
-}
+```text
+OpenIA-Maps/
+|- backend/
+|  |- config/
+|  |  |- openAI.ts            # Client OpenAI
+|  |- controller/
+|  |  |- openAIController.ts  # Coordinacio request/response
+|  |- middleware/
+|  |  |- validateCoords.ts    # Validacio de coordenades
+|  |- routes/
+|  |  |- query.ts             # Endpoint POST /api/query
+|  |- services/
+|  |  |- openAIService.ts     # Crida a OpenAI i composicio de resposta
+|  |- types/
+|  |  |- types.ts             # Tipus de dades (CoordsInfo)
+|  |- server.ts               # Entrypoint backend
+|- frontend/
+|  |- css/
+|  |  |- styles.css           # Estils de la interfície
+|  |- js/
+|  |  |- api.js               # Client HTTP cap al backend
+|  |  |- app.js               # Orquestracio UI i historial
+|  |  |- mapa.js              # Inicialitzacio mapa i marcadors
+|  |- index.html              # Entrypoint frontend
+|- .env                       # Variables d'entorn
+|- package.json               # Scripts i dependències
+|- tsconfig.json              # Configuracio TypeScript
 ```
 
 <details>
-<summary><strong>Explicación de cada opción</strong></summary>
+<summary><strong>Responsabilitats per carpeta</strong></summary>
 
-| Opción | Valor | Por qué |
-|--------|-------|---------|
-| `target` | `ES2020` | Compila a ES2020, que soporta `async/await` nativo, optional chaining (`?.`), nullish coalescing (`??`), etc. |
-| `module` | `commonjs` | Node.js usa `require()` por defecto. CommonJS es el sistema de módulos estándar de Node. |
-| `rootDir` | `./backend` | Define dónde está el código fuente `.ts`. |
-| `outDir` | `./dist` | Define dónde se genera el código compilado `.js`. Separa fuente de compilado. |
-| `strict` | `true` | Activa **todas** las comprobaciones estrictas. Es lo que hace que TypeScript valga la pena. |
-| `esModuleInterop` | `true` | Permite usar `import express from "express"` en vez de `import * as express`. |
-| `resolveJsonModule` | `true` | Permite importar archivos `.json` directamente. |
-| `skipLibCheck` | `true` | Omite la verificación de tipos en archivos `.d.ts` de terceros. Acelera la compilación. |
-| `forceConsistentCasingInFileNames` | `true` | Evita errores por diferencias de mayúsculas/minúsculas en nombres de archivo. |
+| Carpeta | Responsabilitat |
+|---|---|
+| `backend/config` | Inicialitzar clients externs (OpenAI) |
+| `backend/middleware` | Validacions i preproces de request |
+| `backend/controller` | Traduccio entre HTTP i serveis |
+| `backend/services` | Logica de negoci i APIs externes |
+| `frontend/js` | Integracio mapa, API client i estat bàsic UI |
 
 </details>
 
 ---
 
-### 1.5 Añadir scripts de ejecución
+## Arquitectura i Flux
 
-Abre `package.json` y asegúrate de que la sección `scripts` contenga:
+```mermaid
+flowchart LR
+  A[Usuari: formulari o clic al mapa] --> B[frontend/js/app.js]
+  B --> C[frontend/js/api.js: POST /api/query]
+  C --> D[backend/routes/query.ts]
+  D --> E[backend/middleware/validateCoords.ts]
+  E --> F[backend/controller/openAIController.ts]
+  F --> G[backend/services/openAIService.ts]
+  G --> H[OpenAI API]
+  H --> G
+  G --> F
+  F --> C
+  C --> I[frontend/js/mapa.js: marcador + infowindow]
+```
+
+Punts d'entrada:
+
+- Backend: `backend/server.ts`
+- Frontend: `frontend/index.html` (callback `initApp` des de Google Maps)
+
+Funcions clau:
+
+- `validateCoords(req, res, next)`: validacio de presencia, tipus numeric i rang geografic.
+- `handleQuery(req, res)`: control HTTP i tractament d'errors.
+- `getInfoFromCoords(lat, lng)`: construccio prompt i consulta a OpenAI.
+- `queryBackend(lat, lng)`: client fetch al backend.
+- `initMap(onMapClick)`: inicialitza mapa i events.
+- `addMarker(lat, lng, info)`: mostra la resposta al mapa.
+
+---
+
+## API Backend
+
+### Endpoint principal
+
+| Metode | Path | Descripcio |
+|---|---|---|
+| `POST` | `/api/query` | Rep coordenades i retorna context geografic generat per IA |
+
+### Cos de la peticio
 
 ```json
-"scripts": {
-  "dev": "ts-node backend/server.ts",
-  "build": "tsc",
-  "start": "node dist/server.js"
+{
+  "lat": 41.3851,
+  "lng": 2.1734
 }
 ```
 
-| Comando | Qué hace | Cuándo usarlo |
-|---------|----------|---------------|
-| `npm run dev` | Ejecuta TypeScript directamente con `ts-node` | Durante el desarrollo |
-| `npm run build` | Compila todo el proyecto de `.ts` a `.js` | Antes de desplegar |
-| `npm start` | Ejecuta el JavaScript compilado | En producción |
+### Resposta correcta (200)
+
+```json
+{
+  "lat": 41.3851,
+  "lng": 2.1734,
+  "info": "Text descriptiu de la ubicacio..."
+}
+```
+
+### Errors comuns
+
+| Codi | Escenari | Exemple |
+|---|---|---|
+| `400` | Falten `lat` o `lng` | `{ "error": "Cal enviar 'lat' i 'lng' al cos de la peticio." }` |
+| `400` | Tipus invalid | `{ "error": "'lat' i 'lng' han de ser numeros valids." }` |
+| `400` | Fora de rang | `{ "error": "Coordenades fora de rang (lat: -90..90, lng: -180..180)." }` |
+| `500` | Error intern o d'API externa | `{ "error": "Error intern del servidor." }` |
 
 ---
 
-### Estructura del proyecto hasta ahora
+## Instal lacio i Arrencada
 
-```
-aa_4.2/
-├── backend/           ← Código fuente TypeScript (se creará en pasos siguientes)
-├── dist/              ← Código compilado JavaScript (generado por npm run build)
-├── node_modules/      ← Dependencias instaladas
-├── .env               ← Variables de entorno (API keys) — NO subir a Git
-├── package.json       ← Manifiesto del proyecto
-├── package-lock.json  ← Versiones exactas de dependencias
-└── tsconfig.json      ← Configuración de TypeScript
+### Requisits previs
+
+| Eina | Versio recomanada |
+|---|---|
+| Node.js | 18 o superior |
+| npm | 9 o superior |
+
+### 1) Instal lar dependencies
+
+```bash
+npm install
 ```
 
-> **Nota:** La carpeta `backend/` y el archivo `.env` se crearán en los siguientes pasos.
+### 2) Configurar variables d'entorn
+
+Crear o editar `.env`:
+
+```env
+OPENAI_API_KEY=la_teva_clau_openai
+GOOGLE_MAPS_API_KEY=la_teva_clau_google_maps
+PORT=3000
+```
+
+### 3) Executar en desenvolupament
+
+```bash
+npm run dev
+```
+
+### 4) Compilar i executar build
+
+```bash
+npm run build
+npm start
+```
+
+Scripts disponibles:
+
+| Script | Accio |
+|---|---|
+| `npm run dev` | Arrenca backend TypeScript amb `ts-node` |
+| `npm run build` | Compila `backend` a `dist` |
+| `npm start` | Executa el build compilat |
 
 ---
 
-<div align="center">
+## Configuracio d'Entorn
 
-**[Siguiente: Paso 2 →](#)**
+| Variable | Obligatoria | Descripcio |
+|---|---|---|
+| `OPENAI_API_KEY` | Si | Clau de la API d'OpenAI |
+| `GOOGLE_MAPS_API_KEY` | Si | Clau per carregar Google Maps JavaScript API |
+| `PORT` | No | Port del servidor (per defecte `3000`) |
 
-</div>
+> [!IMPORTANT]
+> No publiquis mai claus reals en el repositori. Si una clau s ha exposat, rota la clau immediatament i substitueix-la per un placeholder.
+
+<details>
+<summary><strong>Configuracio TypeScript (resum)</strong></summary>
+
+El projecte compila el backend amb:
+
+- `rootDir: ./backend`
+- `outDir: ./dist`
+- `target: ES2020`
+- `module: commonjs`
+- `strict: true`
+
+</details>
+
+---
+
+## Exemples d'Us
+
+### Exemple 1: consulta via curl
+
+```bash
+curl -X POST http://localhost:3000/api/query \
+  -H "Content-Type: application/json" \
+  -d '{"lat":41.3851,"lng":2.1734}'
+```
+
+### Exemple 2: consulta via fetch
+
+```js
+const response = await fetch("/api/query", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ lat: 41.3851, lng: 2.1734 })
+});
+
+if (!response.ok) throw new Error("Request error");
+const data = await response.json();
+console.log(data.info);
+```
+
+### Exemple 3: flux UI
+
+1. L usuari escriu coordenades al formulari o clica al mapa.
+2. El client envia la peticio a `/api/query`.
+3. El backend valida i consulta OpenAI.
+4. El resultat apareix a l InfoWindow i a l historial lateral.
+
+---
+
+## Troubleshooting
+
+<details>
+<summary><strong>No es carrega el mapa</strong></summary>
+
+- Verifica `GOOGLE_MAPS_API_KEY`.
+- Comprova que la key tingui Google Maps JavaScript API habilitada.
+- Revisa errors de consola del navegador.
+
+</details>
+
+<details>
+<summary><strong>Resposta 500 al backend</strong></summary>
+
+- Revisa `OPENAI_API_KEY`.
+- Comprova connectivitat i quota del compte OpenAI.
+- Revisa logs del servidor.
+
+</details>
+
+<details>
+<summary><strong>Resposta 400 per coordenades</strong></summary>
+
+- `lat` ha d'estar entre -90 i 90.
+- `lng` ha d'estar entre -180 i 180.
+- Ambdos camps han de ser numerics.
+
+</details>
+
+---
+
+## Seguretat i Bones Practiques
+
+- Aplicar limitacio de peticions (rate limiting) al endpoint `/api/query`.
+- Definir timeout i retries per les crides a serveis externs.
+- Sanititzar contingut abans d'injectar-lo a l InfoWindow del mapa.
+- Evitar commitejar arxius `.env` amb dades reals.
+
+> [!WARNING]
+> El projecte no inclou autenticacio al endpoint. En entorns publicats, cal protegir l API per evitar abús i consum indegut de credits.
+
+---
+
+## Contribucio
+
+Les contribucions son benvingudes.
+
+1. Fes un fork del repositori.
+2. Crea una branca de treball: `feature/nom-curt`.
+3. Mantingues canvis petits i orientats a una sola millora.
+4. Executa comprovacions basiques abans del PR:
+
+```bash
+npm run build
+```
+
+5. Obre un Pull Request amb:
+   - context del problema
+   - solucio aplicada
+   - impacte esperat
+
+---
+
+## Llicencia
+
+Actualment no s ha detectat cap fitxer de llicencia al repositori.
+
+Es recomana afegir un fitxer `LICENSE` (per exemple MIT) per definir clarament els drets d'us i distribucio.
+
+---
+
+## Credits
+
+Projecte original: Arnau Aumedes.
+
+Documentacio README generada amb analisi automatica de codi per millorar mantenibilitat, onboarding i qualitat documental.

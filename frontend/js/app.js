@@ -32,7 +32,18 @@ async function handleQuery(lat, lng) {
     if (!historyList) return;
   
     const li = document.createElement("li");
-    li.textContent = `[${lat.toFixed(4)}, ${lng.toFixed(4)}]: ${info.substring(0, 100)}...`;
+    const maxPreviewLength = 100;
+    const preview = info.length > maxPreviewLength
+      ? `${info.substring(0, maxPreviewLength)}...`
+      : info;
+
+    li.textContent = `[${lat.toFixed(4)}, ${lng.toFixed(4)}]: ${preview}`;
+    li.style.cursor = "pointer";
+    li.title = "Fes clic per veure el text complet";
+    li.addEventListener("click", () => {
+      alert(`[${lat.toFixed(4)}, ${lng.toFixed(4)}]\n\n${info}`);
+    });
+
     historyList.prepend(li);
   }
   

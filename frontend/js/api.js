@@ -21,8 +21,19 @@ async function queryBackend(lat, lng) {
     });
   
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Error desconegut");
+      let message = "Error desconegut";
+
+      try {
+        const error = await response.json();
+        message = error.error || message;
+      } catch {
+        const text = await response.text();
+        if (text) {
+          message = text;
+        }
+      }
+
+      throw new Error(message);
     }
   
     return response.json();
