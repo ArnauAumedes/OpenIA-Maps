@@ -91,3 +91,48 @@ main {
   flex: 1;
   height: 100%;
 }
+
+.map-info-window {
+  max-width: 320px;
+  font-size: 0.9rem;
+  color: #1f2937;
+  line-height: 1.45;
+}
+
+.map-info-window h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.map-info-window .coords {
+  margin: 0 0 0.5rem;
+  font-size: 0.82rem;
+  color: #334155;
+}
+
+.map-info-window .intro {
+  margin: 0 0 0.55rem;
+}
+
+.map-info-window .section-title {
+  margin: 0.1rem 0 0.3rem;
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #475569;
+}
+
+.map-info-window .details {
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.map-info-window .details li {
+  margin-bottom: 0.25rem;
+}
+
+.map-info-window .details li:last-child {
+  margin-bottom: 0;
+}

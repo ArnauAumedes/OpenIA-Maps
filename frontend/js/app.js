@@ -30,6 +30,9 @@ async function handleQuery(lat, lng) {
   function addToHistory(lat, lng, info) {
     const historyList = document.getElementById("history");
     if (!historyList) return;
+
+    const latText = String(lat);
+    const lngText = String(lng);
   
     const li = document.createElement("li");
     const maxPreviewLength = 100;
@@ -37,11 +40,11 @@ async function handleQuery(lat, lng) {
       ? `${info.substring(0, maxPreviewLength)}...`
       : info;
 
-    li.textContent = `[${lat.toFixed(4)}, ${lng.toFixed(4)}]: ${preview}`;
+    li.textContent = `[${latText}, ${lngText}]: ${preview}`;
     li.style.cursor = "pointer";
     li.title = "Fes clic per veure el text complet";
     li.addEventListener("click", () => {
-      alert(`[${lat.toFixed(4)}, ${lng.toFixed(4)}]\n\n${info}`);
+      alert(`[${latText}, ${lngText}]\n\n${info}`);
     });
 
     historyList.prepend(li);
